@@ -3,6 +3,7 @@
 namespace App\Controller;
 use App\Entity\Student;
 use App\Form\StudentType;
+use App\Form\SearchStudentType;
 use App\Repository\StudentRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,10 +22,23 @@ class StudentController extends AbstractController
     }
 
     #[Route('/students', name: 'app_Student')]
-    public function listStudent(StudentRepository $repository){
-        $students= $repository->findAll();
-        return $this->render("student/listStudent.html.twig",array("tabStudent"=>$students));
+    public function listStudent(Request $request,StudentRepository $repository)
+    {
+       $students= $repository->findAll();
+       $formSearch= $this->createForm(SearchStudentType::class);
+       $formSearch->handleRequest($request);
+       $sortByMoyenne= $repository->sortByMoyenne();
+       if($formSearch->isSubmitted()){
+           $nce= $formSearch->get('nce')->getData();
+           //var_dump($nce).die();
+           $result= $repository->searchStudent($nce);
+           return $this->renderForm("student/listStudent.html.twig",
+               array("tabStudent"=>$result, "sortByMoyenne"=>$sortByMoyenne,"searchForm"=>$formSearch));
+       }
+         return $this->renderForm("student/listStudent.html.twig",
+           array("tabStudent"=>$students,"searchForm"=>$formSearch, "sortByMoyenne"=>$sortByMoyenne,));
     }
+
 
     #[route('/addStudent',name:'add_student')]
 public function addStudent(ManagerRegistry $doctrine,Request $request ,StudentRepository $repository)

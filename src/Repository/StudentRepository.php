@@ -39,6 +39,21 @@ class StudentRepository extends ServiceEntityRepository
         }
     }
 
+    public function sortByMoyenne(){
+        $qb=$this->createQueryBuilder('x')
+        ->orderBy('x.moyenne','DESC');
+        return $qb->getQuery()
+        ->getResult();
+    }
+
+    public function searchStudent($nce) {
+        $qb=  $this->createQueryBuilder('s')
+            ->where('s.nce LIKE :x')
+            ->setParameter('x',$nce);
+        return $qb->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Student[] Returns an array of Student objects
 //     */
